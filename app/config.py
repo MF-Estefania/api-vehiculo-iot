@@ -15,7 +15,7 @@ class Settings:
     Responsabilidad única: configuración. No abre conexiones a la base de datos.
     """
 
-    _REQUERIDAS = ("DB_HOST", "DB_PORT", "DB_NAME", "DB_USER", "DB_PASSWORD")
+    _REQUERIDAS = ("DB_HOST", "DB_PORT", "DB_NAME", "DB_USER", "DB_PASSWORD", "API_KEY")
 
     def __init__(self) -> None:
         faltantes = [nombre for nombre in self._REQUERIDAS if not os.getenv(nombre)]
@@ -33,6 +33,7 @@ class Settings:
         self._db_name = os.getenv("DB_NAME")
         self._db_user = os.getenv("DB_USER")
         self._db_password = os.getenv("DB_PASSWORD")
+        self._api_key = os.getenv("API_KEY")
 
     @property
     def db_host(self) -> str:
@@ -49,6 +50,10 @@ class Settings:
     @property
     def db_user(self) -> str:
         return self._db_user
+
+    @property
+    def api_key(self) -> str:
+        return self._api_key
 
     @property
     def db_password(self) -> str:

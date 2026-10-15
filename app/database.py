@@ -7,7 +7,21 @@ from app.config import settings
 
 
 class DatabaseError(Exception):
-    """Error de acceso a la base de datos, sin datos sensibles en el mensaje."""
+    """Error de acceso a la base de datos, sin datos sensibles en el mensaje.
+
+    `codigo` conserva el número de error de MySQL (por ejemplo 1451) para que los
+    servicios lo traduzcan a un error de negocio. Nunca se muestra al cliente.
+    """
+
+    def __init__(self, mensaje: str, codigo: int | None = None) -> None:
+        super().__init__(mensaje)
+        self.codigo = codigo
+
+
+def _codigo(error: pymysql.MySQLError) -> int | None:
+    if error.args and isinstance(error.args[0], int):
+        return error.args[0]
+    return None
 
 
 class Database:
@@ -36,14 +50,15 @@ class Database:
         """Crea y devuelve una conexión nueva."""
         try:
             return pymysql.connect(**self._config)
-        except pymysql.MySQLError:
-            raise DatabaseError("No fue posible conectar con la base de datos") from None
+        except pymysql.MySQLError as e:
+            raise DatabaseError(
+                "No fue posible conectar con la base de datos", _codigo(e)
+            ) from None
 
     @staticmethod
     def execute_procedure(cursor, nombre: str, args: tuple = ()) -> list[dict]:
         """Ejecuta un SP con un cursor ya abierto y devuelve sus filas.
 
-        Se usa dentro de transaction() cuando se necesita encadenar varios SP.
         El nombre del SP lo define el código, nunca el usuario; los valores
         viajan siempre como parámetros.
         """
@@ -62,9 +77,11 @@ class Database:
                 filas = self.execute_procedure(cursor, nombre, args)
             conn.commit()
             return filas
-        except pymysql.MySQLError:
+        except pymysql.MySQLError as e:
             conn.rollback()
-            raise DatabaseError("No fue posible completar la operación") from None
+            raise DatabaseError(
+                "No fue posible completar la operación", _codigo(e)
+            ) from None
         finally:
             conn.close()
 
@@ -79,9 +96,11 @@ class Database:
             with conn.cursor() as cursor:
                 yield cursor
             conn.commit()
-        except pymysql.MySQLError:
+        except pymysql.MySQLError as e:
             conn.rollback()
-            raise DatabaseError("No fue posible completar la transacción") from None
+            raise DatabaseError(
+                "No fue posible completar la transacción", _codigo(e)
+            ) from None
         except Exception:
             conn.rollback()
             raise
@@ -95,8 +114,8 @@ class Database:
             with conn.cursor() as cursor:
                 cursor.execute("SELECT 1")
                 return cursor.fetchone() is not None
-        except pymysql.MySQLError:
-            raise DatabaseError("La base de datos no respondió") from None
+        except pymysql.MySQLError as e:
+            raise DatabaseError("La base de datos no respondió", _codigo(e)) from None
         finally:
             conn.close()
 

@@ -3,7 +3,7 @@ from fastapi.responses import JSONResponse
 
 from app.database import DatabaseError
 from app.exceptions import ConflictoError, RecursoNoEncontrado
-from app.routers import comandos, estado, historial, movimientos, vehiculos, ws
+from app.routers import comandos, demos, estado, historial, movimientos, vehiculos, ws
 
 app = FastAPI(
     title="API Vehículo IoT",
@@ -33,3 +33,4 @@ app.include_router(estado.router)
 app.include_router(historial.router)
 app.include_router(movimientos.router)
 app.include_router(ws.router)
+app.include_router(demos.router)

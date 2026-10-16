@@ -3,7 +3,7 @@ from fastapi.responses import JSONResponse
 
 from app.database import DatabaseError
 from app.exceptions import ConflictoError, RecursoNoEncontrado
-from app.routers import vehiculos
+from app.routers import comandos, estado, historial, vehiculos
 
 app = FastAPI(
     title="API Vehículo IoT",
@@ -27,5 +27,7 @@ async def manejar_error_bd(request: Request, exc: DatabaseError):
     # Mensaje genérico: nunca exponemos credenciales ni detalles internos.
     return JSONResponse(status_code=503, content={"detail": "Servicio de datos no disponible"})
 
-
 app.include_router(vehiculos.router)
+app.include_router(comandos.router)
+app.include_router(estado.router)
+app.include_router(historial.router)

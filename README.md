@@ -5,7 +5,7 @@ Autor: `Estefania Marin`
 
 API local en Python (FastAPI) con programación orientada a objetos que controla y monitorea un vehículo IoT. Usa los 21 Stored Procedures del esquema `vehiculo_iot` alojado en Amazon RDS (MySQL) y transmite eventos en tiempo real por WebSocket.
 
-> Alcance: esta API se ejecuta **solo en `localhost:8000`**. La publicación en un servidor público (HTTPS/WSS) corresponde a la práctica 2.6.
+> Alcance: la API se desarrollo inicialmente en un entorno local durante la practica 2.5 y posteriormente se publico en Amazon EC2 durante la practica 2.6, con acceso publico mediante HTTPS y WSS.
 
 ## Requisitos
 
@@ -207,3 +207,50 @@ Al conectarse, el servidor consulta RDS y envía de inmediato el último estado.
 1. **POST**: registrar un movimiento individual y verificar estado e historial.
 2. **GET**: consultar el historial (máximo 10, del más reciente al más antiguo).
 3. **WebSocket**: conectar al vehículo, iniciar una DEMO y verificar inicio, N movimientos en orden y fin, sin nuevos registros en el historial.
+
+## Práctica 2.6 — Despliegue público en AWS
+
+La API desarrollada en la práctica 2.5 se migró a una instancia Amazon EC2 con Ubuntu Server 24.04, manteniendo su arquitectura orientada a objetos, sus servicios GET y POST, los 21 procedimientos almacenados y la conexión con Amazon RDS for MySQL.
+
+### Arquitectura de despliegue
+
+- **Amazon EC2:** servidor Ubuntu donde se ejecuta la API con FastAPI y Uvicorn.
+- **Amazon RDS:** base de datos MySQL `vehiculo_iot`, utilizada para consultar y almacenar la información.
+- **systemd:** mantiene la API ejecutándose como servicio, independientemente de la sesión SSH.
+- **Nginx:** funciona como proxy inverso y permite el acceso público mediante HTTPS y WSS.
+- **Let's Encrypt:** proporciona el certificado TLS para las conexiones seguras.
+- **DuckDNS y Elastic IP:** permiten acceder a la API mediante un dominio asociado a una dirección IP pública fija.
+
+### Enlaces públicos
+
+**Swagger UI:**
+
+https://api-terreneitor-km2026.duckdns.org/docs
+
+**WebSocket seguro:**
+
+`wss://api-terreneitor-km2026.duckdns.org/ws/vehiculos/2`
+
+### Pruebas realizadas
+
+Se comprobó el funcionamiento de las solicitudes GET y POST desde Swagger y Postman, verificando la conexión con Amazon RDS y el registro de movimientos individuales en el historial.
+
+También se establecieron dos conexiones WebSocket simultáneas y se confirmó que ambas recibieron la notificación de un movimiento enviado mediante POST.
+
+Finalmente, se ejecutó una secuencia DEMO y se verificó que sus movimientos se transmitieran en tiempo real sin generar registros adicionales en el historial.
+
+### Ejecución en Amazon EC2
+
+La API se ejecuta mediante el servicio `api-vehiculo-iot.service` de systemd y utiliza Nginx para atender las conexiones públicas HTTPS y WSS.
+
+Para consultar el estado del servicio en Ubuntu:
+
+```bash
+sudo systemctl status api-vehiculo-iot
+```
+
+La API permanece disponible aunque se cierre Visual Studio Code o la conexión SSH, siempre que la instancia EC2 permanezca encendida y los servicios estén funcionando.
+
+Las credenciales de Amazon RDS y la clave de la API se mantienen fuera del repositorio mediante variables de entorno.
+
+

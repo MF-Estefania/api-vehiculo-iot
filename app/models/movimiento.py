@@ -1,3 +1,4 @@
+
 from pydantic import BaseModel, ConfigDict, Field
 
 from app.models.estado import EstadoOut
@@ -17,7 +18,7 @@ class MovimientoOut(BaseModel):
 
     id_vehiculo: int
     comando: str
-    codigo: int
+    codigo: str
     origen: str
     estado: EstadoOut
     clientes_notificados: int

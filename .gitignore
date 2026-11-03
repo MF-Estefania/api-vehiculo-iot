@@ -3,3 +3,18 @@
 __pycache__/
 *.pyc
 .vscode/
+# Configuraciones privadas
+.env
+.env.*
+# Entornos virtuales de Python
+.venv/
+# Respaldos locales de MySQL
+*.sql
+# Respaldos locales de AWS
+respaldos_locales/
+# Respaldos locales: nunca subir a GitHub
+respaldos_locales/
+
+# Permitir scripts SQL de migracion
+!migraciones/
+!migraciones/*.sql

@@ -1,3 +1,4 @@
+
 from pydantic import BaseModel, ConfigDict, Field
 
 
@@ -14,7 +15,7 @@ class MovimientoDemoOut(BaseModel):
     orden: int
     id_comando: int
     comando: str
-    codigo: int
+    codigo: str
     duracion_ms: int
     pausa_ms: int
 

@@ -1,6 +1,6 @@
 import asyncio
 
-from fastapi import APIRouter, Path
+from fastapi import APIRouter, Depends, Path
 
 from app.exceptions import ConflictoError
 from app.models.movimiento import MovimientoCrear, MovimientoOut
@@ -8,6 +8,7 @@ from app.services.demo_runner import runner
 from app.services.movimiento_service import MovimientoService
 from app.websocket.eventos import crear_evento
 from app.websocket.manager import manager
+from app.security import requerir_api_key_o_sesion
 
 router = APIRouter(prefix="/vehiculos/{id_vehiculo}/movimientos", tags=["Movimientos"])
 servicio = MovimientoService()
@@ -16,6 +17,7 @@ servicio = MovimientoService()
 @router.post(
     "",
     response_model=MovimientoOut,
+    dependencies=[Depends(requerir_api_key_o_sesion)],
     status_code=201,
     summary="Registrar un movimiento individual",
     description=(

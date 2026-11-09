@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, Path
 
 from app.models.comun import MensajeOut
 from app.models.vehiculo import VehiculoActualizar, VehiculoCrear, VehiculoOut
-from app.security import requerir_api_key
+from app.security import requerir_administradora
 from app.services.vehiculo_service import VehiculoService
 
 router = APIRouter(prefix="/vehiculos", tags=["Vehículos"])
@@ -37,6 +37,7 @@ def obtener_vehiculo(id_vehiculo: int = Path(..., gt=0, description="ID del veh�
 
 @router.post(
     "",
+    dependencies=[Depends(requerir_administradora)],
     response_model=VehiculoOut,
     status_code=201,
     summary="Registrar un vehículo",
@@ -55,6 +56,7 @@ def crear_vehiculo(datos: VehiculoCrear):
 
 @router.post(
     "/{id_vehiculo}/actualizar",
+    dependencies=[Depends(requerir_administradora)],
     response_model=VehiculoOut,
     summary="Actualizar un vehículo",
     description=(
@@ -77,7 +79,7 @@ def actualizar_vehiculo(
 @router.post(
     "/{id_vehiculo}/eliminar",
     response_model=MensajeOut,
-    dependencies=[Depends(requerir_api_key)],
+    dependencies=[Depends(requerir_administradora)],
     summary="Eliminar un vehículo (protegido)",
     description=(
         "Elimina un vehículo. Requiere el encabezado `X-API-Key`. "

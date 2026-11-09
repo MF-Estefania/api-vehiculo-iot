@@ -1,14 +1,23 @@
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 
 from app.database import DatabaseError
 from app.exceptions import ConflictoError, RecursoNoEncontrado
-from app.routers import comandos, demos, estado, historial, movimientos, vehiculos, ws
+from app.routers import auth, comandos, demos, estado, historial, movimientos, vehiculos, ws
 
 app = FastAPI(
     title="API Vehículo IoT",
     description="API local (Dev) para el vehículo IoT, con Amazon RDS y WebSocket.",
     version="1.0.0",
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["https://mf-estefania.github.io"],
+    allow_credentials=False,
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE"],
+    allow_headers=["Authorization", "Content-Type", "X-API-Key"],
 )
 
 
@@ -34,3 +43,4 @@ app.include_router(historial.router)
 app.include_router(movimientos.router)
 app.include_router(ws.router)
 app.include_router(demos.router)
+app.include_router(auth.router)

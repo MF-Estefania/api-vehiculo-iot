@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, Path
 
 from app.models.comando import ComandoActualizar, ComandoCrear, ComandoOut
 from app.models.comun import MensajeOut
-from app.security import requerir_api_key
+from app.security import requerir_administradora
 from app.services.comando_service import ComandoService
 
 router = APIRouter(prefix="/vehiculos/{id_vehiculo}/comandos", tags=["Comandos"])
@@ -31,6 +31,7 @@ def listar_comandos(id_vehiculo: int = _ID_VEHICULO):
 
 @router.post(
     "",
+    dependencies=[Depends(requerir_administradora)],
     response_model=ComandoOut,
     status_code=201,
     summary="Crear un comando en el catálogo",
@@ -51,6 +52,7 @@ def crear_comando(datos: ComandoCrear, id_vehiculo: int = _ID_VEHICULO):
 
 @router.post(
     "/{id_comando}/actualizar",
+    dependencies=[Depends(requerir_administradora)],
     response_model=ComandoOut,
     summary="Actualizar un comando",
     description=(
@@ -75,7 +77,7 @@ def actualizar_comando(
 @router.post(
     "/{id_comando}/eliminar",
     response_model=MensajeOut,
-    dependencies=[Depends(requerir_api_key)],
+    dependencies=[Depends(requerir_administradora)],
     summary="Eliminar un comando (protegido)",
     description=(
         "Elimina un comando del catálogo. Requiere el encabezado `X-API-Key`. "

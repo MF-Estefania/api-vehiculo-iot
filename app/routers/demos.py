@@ -10,7 +10,7 @@ from app.models.demo import (
     MovimientoDemoCrear,
     MovimientoDemoOut,
 )
-from app.security import requerir_api_key
+from app.security import requerir_administradora, requerir_api_key_o_sesion
 from app.services.demo_runner import runner
 from app.services.demo_service import DemoService
 
@@ -67,6 +67,7 @@ def listar_movimientos_demo(id_vehiculo: int = _ID_VEHICULO, id_demo: int = _ID_
     "",
     response_model=DemoOut,
     status_code=201,
+    dependencies=[Depends(requerir_administradora)],
     summary="Crear una DEMO",
     description="Crea una DEMO vacía para el vehículo. **SP:** `sp_obtener_vehiculo`, `sp_crear_demo` y `sp_obtener_demos`.",
     responses={**_R_NOT_FOUND, 422: {"description": "Datos inválidos"}, **_R_DB},
@@ -78,6 +79,7 @@ def crear_demo(datos: DemoCrear, id_vehiculo: int = _ID_VEHICULO):
 @router.post(
     "/{id_demo}/actualizar",
     response_model=DemoOut,
+    dependencies=[Depends(requerir_administradora)],
     summary="Actualizar una DEMO",
     description="Reemplaza nombre, descripción y estado activo. **SP:** `sp_obtener_demos` y `sp_actualizar_demo`.",
     responses={**_R_NOT_FOUND, 422: {"description": "Datos inválidos"}, **_R_DB},
@@ -91,7 +93,7 @@ def actualizar_demo(
 @router.post(
     "/{id_demo}/eliminar",
     response_model=MensajeOut,
-    dependencies=[Depends(requerir_api_key)],
+    dependencies=[Depends(requerir_administradora)],
     summary="Eliminar una DEMO (protegido)",
     description="Elimina una DEMO. Requiere `X-API-Key`. **SP:** `sp_obtener_demos` y `sp_eliminar_demo`.",
     responses={
@@ -113,6 +115,7 @@ def eliminar_demo(id_vehiculo: int = _ID_VEHICULO, id_demo: int = _ID_DEMO):
     "/{id_demo}/movimientos",
     response_model=list[MovimientoDemoOut],
     status_code=201,
+    dependencies=[Depends(requerir_administradora)],
     summary="Agregar un movimiento a una DEMO",
     description=(
         "Agrega un movimiento (comando, orden, duración y pausa) y devuelve la secuencia "
@@ -136,6 +139,7 @@ def agregar_movimiento(
 @router.post(
     "/{id_demo}/movimientos/{id_movimiento}/actualizar",
     response_model=MovimientoDemoOut,
+    dependencies=[Depends(requerir_administradora)],
     summary="Actualizar un movimiento de una DEMO",
     description=(
         "Reemplaza comando, orden, duración y pausa del movimiento. "
@@ -160,7 +164,7 @@ def actualizar_movimiento(
 @router.post(
     "/{id_demo}/movimientos/{id_movimiento}/eliminar",
     response_model=MensajeOut,
-    dependencies=[Depends(requerir_api_key)],
+    dependencies=[Depends(requerir_administradora)],
     summary="Eliminar un movimiento de una DEMO (protegido)",
     description=(
         "Elimina un movimiento. Requiere `X-API-Key`. "
@@ -183,7 +187,7 @@ def eliminar_movimiento(
 @router.post(
     "/cancelar",
     response_model=MensajeOut,
-    dependencies=[Depends(requerir_api_key)],
+    dependencies=[Depends(requerir_api_key_o_sesion)],
     summary="Cancelar la DEMO en ejecución (protegido)",
     description=(
         "Detiene de inmediato la DEMO activa del vehículo: no se emite ningún movimiento "
@@ -201,7 +205,7 @@ def cancelar_demo(id_vehiculo: int = _ID_VEHICULO):
     "/{id_demo}/iniciar",
     response_model=DemoIniciadaOut,
     status_code=202,
-    dependencies=[Depends(requerir_api_key)],
+    dependencies=[Depends(requerir_api_key_o_sesion)],
     summary="Iniciar una DEMO (protegido)",
     description=(
         "Valida que el vehículo y la DEMO existan, estén activos y se pertenezcan; "

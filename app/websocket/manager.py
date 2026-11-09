@@ -1,9 +1,9 @@
 import asyncio
+import logging
 from collections import defaultdict
-
 from fastapi import WebSocket
 
-
+logger = logging.getLogger(__name__)
 class ConnectionManager:
     """Administra los clientes WebSocket agrupados por vehículo.
 
@@ -26,11 +26,16 @@ class ConnectionManager:
             self._conexiones.pop(id_vehiculo, None)
 
     async def enviar(self, websocket: WebSocket, mensaje: dict) -> bool:
-        """Envía a un cliente. Devuelve False si falló (cliente caído)."""
+        """Envía un mensaje y registra errores de comunicacion."""
         try:
             await websocket.send_json(mensaje)
+            logger.info(
+                "[WSS] Evento enviado correctamente: %s",
+                mensaje.get("tipo", "desconocido")
+            )
             return True
         except Exception:
+            logger.exception("[WSS] Error al enviar evento")
             return False
 
     async def difundir(self, id_vehiculo: int, mensaje: dict) -> int:

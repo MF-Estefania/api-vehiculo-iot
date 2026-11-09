@@ -18,3 +18,17 @@ respaldos_locales/
 # Permitir scripts SQL de migracion
 !migraciones/
 !migraciones/*.sql
+# Respaldos de SCARLETTE
+respaldo_pre_scarlette/
+*.respaldo_paso*
+
+# Archivos temporales de editores
+*.swp
+*.swo
+*~
+
+# Scripts temporales de pruebas
+crear_tabla_ws.py
+prueba_auth.py
+prueba_logout.py
+prueba_seguridad.py
